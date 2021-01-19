@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">WebViewSample</string>
+
+    <!-- 파일 다운로드 안내 메시지 -->
+    <string name="msg_file_download_success">다운로드를 완료했습니다.</string>
+    <string name="msg_file_download_fail">다운로드에 실패했습니다.</string>
+    <string name="msg_permission_file_download">파일 다운로드를 위해 \'저장공간\'에 대한 권한이 필요합니다.</string>
+
+    <!-- ssl 에러 메시지 -->
+    <string name="ssl_default_title">SSL Error</string>
+    <string name="ssl_default_msg">보안 인증서가 유효하지 않습니다.\n계속 진행 하시겠습니까?</string>
+    <string name="ssl_untrusted_msg">보안 인증서를 신뢰할 수 없습니다.\n계속 진행 하시겠습니까?</string>
+    <string name="ssl_expired_msg">보안 인증서가 만료되었습니다.\n계속 진행 하시겠습니까?</string>
+    <string name="ssl_idmismatch_msg">보안 인증서 ID가 일치하지 않습니다.\n계속 진행 하시겠습니까?</string>
+    <string name="ssl_notyetvalid_msg">보안 인증서가 유효하지 않습니다.\n계속 진행 하시겠습니까?</string>
+
+    <!-- 웹뷰 에러 메시지-->
+    <string name="msg_err_webview">웹 페이지를 표시할 수 없습니다.\n데이터 접속 상태를 확인 후 다시 시도해주세요.</string>
+    <string name="msg_err_load_web">웹 페이지를 표시할 수 없습니다.</string>
+</resources>
