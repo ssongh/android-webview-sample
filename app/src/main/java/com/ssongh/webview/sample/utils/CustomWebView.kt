@@ -52,7 +52,7 @@ class CustomWebView : WebView {
      */
     @SuppressLint("SetJavaScriptEnabled")
     private fun webSettings() {
-        this.settings?.run {
+        this.settings.run {
             javaScriptEnabled = true
             javaScriptCanOpenWindowsAutomatically = true
             loadsImagesAutomatically = true
@@ -65,7 +65,6 @@ class CustomWebView : WebView {
             layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
             textZoom = 100
 
-            userAgentString += " KBIZ_APP Android"
 
             // 웹뷰 내 핀치 줌
             builtInZoomControls = true
@@ -79,6 +78,8 @@ class CustomWebView : WebView {
                 // Mixed Content 항상 허용
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             }
+            L.d(userAgentString)
+
         }
 
         // 킷캣 이상

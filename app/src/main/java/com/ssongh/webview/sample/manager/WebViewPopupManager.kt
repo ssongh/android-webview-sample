@@ -6,8 +6,8 @@ import android.content.Context
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import com.ssongh.webview.sample.base.BaseWebChromeClient
 import com.ssongh.webview.sample.utils.CustomWebView
+import com.ssongh.webview.sample.utils.L
 import com.ssongh.webview.sample.utils.SingletonHolder
 
 
@@ -88,7 +88,7 @@ class WebViewPopupManager private constructor(private val context: Context) {
     fun addWebView(
         activity: Activity?,
         webView: CustomWebView,
-        webChromeClient: BaseWebChromeClient
+        webChromeClient: WebChromeClient
     ) {
         activity?.window?.decorView?.findViewById<ViewGroup>(android.R.id.content)?.addView(webView)
 
@@ -103,7 +103,17 @@ class WebViewPopupManager private constructor(private val context: Context) {
      */
     fun closePopup() {
         if (webViewList.isNotEmpty()) {
-            webViewList[webViewList.lastIndex].loadUrl("javascript:self.close();")
+            val popupView = lastWebView()
+
+            if (popupView.canGoBack()) {
+                popupView.goBack()
+                L.d("goBack()")
+
+            } else {
+                lastWebChromeClient().onCloseWindow(popupView)
+
+                L.d("parent.window.close()")
+            }
         }
     }
 
@@ -135,10 +145,10 @@ class WebViewPopupManager private constructor(private val context: Context) {
     /**
      * 최상위 팝업의 WebView 반환
      */
-    fun lastWebView() = webViewList[webViewList.lastIndex]
+    private fun lastWebView() = webViewList[webViewList.lastIndex]
 
     /**
      * 최상위 팝업의 WebChromeClient 반환
      */
-    fun lastWebChromeClient() = webChromeClientList[webChromeClientList.lastIndex]
+    private fun lastWebChromeClient() = webChromeClientList[webChromeClientList.lastIndex]
 }

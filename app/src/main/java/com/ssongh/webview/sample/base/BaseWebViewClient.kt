@@ -10,6 +10,9 @@ import android.webkit.*
 import com.ssongh.webview.sample.R
 import com.ssongh.webview.sample.utils.DialogUtils
 import com.ssongh.webview.sample.utils.L
+import java.lang.Error
+import java.lang.Exception
+import kotlin.jvm.Throws
 
 
 class BaseWebViewClient : WebViewClient() {
@@ -63,7 +66,7 @@ class BaseWebViewClient : WebViewClient() {
         if (view != null && !url.isNullOrEmpty()) {
             return overrideUrlLoading(view, url)
         }
-        return true
+        return super.shouldOverrideUrlLoading(view, url)
     }
 
     /**
@@ -74,8 +77,8 @@ class BaseWebViewClient : WebViewClient() {
 
         val uri: Uri? = Uri.parse(url)
 
-        val scheme = uri?.scheme ?: "unknown"
-        val host = uri?.host ?: "unknown"
+//        val scheme = uri?.scheme ?: "unknown"
+//        val host = uri?.host ?: "unknown"
 
         if (url.startsWith("intent://")) {
             val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
@@ -119,7 +122,7 @@ class BaseWebViewClient : WebViewClient() {
                         )
                     }
                 } else {
-                    view.loadUrl(url)
+                    return false
                 }
             }
         }

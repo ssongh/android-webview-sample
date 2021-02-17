@@ -1,10 +1,12 @@
 package com.ssongh.webview.sample.base
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.os.Build
 import android.os.Message
 import android.view.*
 import android.webkit.*
@@ -17,6 +19,7 @@ import com.ssongh.webview.sample.manager.WebViewPopupManager
 import com.ssongh.webview.sample.utils.CustomWebView
 import com.ssongh.webview.sample.utils.DialogUtils
 import com.ssongh.webview.sample.utils.L
+import java.lang.Exception
 
 
 open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClient() {
@@ -29,6 +32,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
     )
 
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
+        L.i("onProgressChanged:newProgress = $newProgress")
         super.onProgressChanged(view, newProgress)
     }
 
@@ -53,6 +57,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
             customViewCallback = callback
 
             WebViewPopupManager.getInstance(this).isVideoFullScreen = true
+            L.i("onShowCustomView")
         }
 
         super.onShowCustomView(view, callback)
@@ -75,6 +80,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
             WebViewPopupManager.getInstance(this).isVideoFullScreen = false
+            L.i("onHideCustomView")
         }
 
         activity?.currentFocus?.clearFocus()
@@ -96,6 +102,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
                 this.gravity = Gravity.CENTER
             }
         }
+        L.i("resizeChildView")
     }
 
     /**
@@ -105,24 +112,38 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
     private fun setFullscreen(enabled: Boolean) {
         activity?.run {
             val win = window
-            val winParams = win.attributes
-            val bits = WindowManager.LayoutParams.FLAG_FULLSCREEN
-            val immersiveFlags =
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
 
-            if (enabled) {
-                winParams.flags = winParams.flags or bits
-                customView?.systemUiVisibility = immersiveFlags
-                customView?.setOnSystemUiVisibilityChangeListener {
-                    if (customView?.systemUiVisibility != immersiveFlags) {
-                        customView?.systemUiVisibility = immersiveFlags
-                    }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val insetsController = window.insetsController
+                if (enabled) {
+                    insetsController?.hide(WindowInsets.Type.statusBars())
+                    L.i("setFullscreen_hide(WindowInsets.Type.statusBars())")
+                } else {
+                    insetsController?.show(WindowInsets.Type.statusBars())
+                    L.i("setFullscreen_show(WindowInsets.Type.statusBars())")
                 }
+
             } else {
-                winParams.flags = winParams.flags and bits.inv()
-                customView?.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                val winParams = win.attributes
+                val bits = WindowManager.LayoutParams.FLAG_FULLSCREEN
+                val immersiveFlags =
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+
+                if (enabled) {
+                    winParams.flags = winParams.flags or bits
+                    customView?.systemUiVisibility = immersiveFlags
+                    customView?.setOnSystemUiVisibilityChangeListener {
+                        if (customView?.systemUiVisibility != immersiveFlags) {
+                            customView?.systemUiVisibility = immersiveFlags
+                        }
+                    }
+                } else {
+                    winParams.flags = winParams.flags and bits.inv()
+                    customView?.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                }
+                win.attributes = winParams
+                L.i("setFullscreen_Build.VERSION.SDK_INT < Build.VERSION_CODES.R)")
             }
-            win.attributes = winParams
         }
     }
 
@@ -170,8 +191,8 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
         resultMsg: Message?
     ): Boolean {
         view?.context?.let {
-            val childWebViewClient: BaseWebViewClient = BaseWebViewClient()
-            val childWebChromeClient: BaseWebChromeClient = BaseWebChromeClient(activity)
+            val childWebViewClient = BaseWebViewClient()
+            val childWebChromeClient = BaseWebChromeClient(activity)
 
             val childView = CustomWebView(it).apply {
                 webViewClient = childWebViewClient
@@ -189,9 +210,8 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
 
             (resultMsg?.obj as? WebView.WebViewTransport)?.webView = childView
             resultMsg?.sendToTarget()
-
-            L.i("onCreateWindow")
         }
+        L.i("onCreateWindow")
         return true
     }
 
@@ -200,6 +220,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
      */
     override fun onCloseWindow(window: WebView?) {
         super.onCloseWindow(window)
+
         window?.context?.let {
             WebViewPopupManager.getInstance(it).removeWebView(activity)
         }
@@ -214,7 +235,6 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
         filePathCallback: ValueCallback<Array<Uri>>?,
         fileChooserParams: FileChooserParams?
     ): Boolean {
-
         webView?.context?.run {
             if (filePathCallback != null) {
                 WebViewFileManager.getInstance(this).resetFilePathCallback()
@@ -231,6 +251,7 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
                 )
             }
         }
+        L.i("onShowFileChooser")
         return true
     }
 
@@ -242,7 +263,8 @@ open class BaseWebChromeClient(private val activity: Activity?) : WebChromeClien
             setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
         }
 
-        override fun onTouchEvent(evt: MotionEvent): Boolean {
+        @SuppressLint("ClickableViewAccessibility")
+        override fun onTouchEvent(event: MotionEvent?): Boolean {
             return true
         }
     }
